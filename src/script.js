@@ -19,7 +19,23 @@ const scene = new THREE.Scene();
  * Debug
  */
 const gui = new dat.GUI();
-
+const debugObject = {};
+debugObject.maakBowlingbal = () => {
+  createBowlingball(2, {
+    x: (Math.random() - 0.5) * 10,
+    y: 10,
+    z: (Math.random() - 0.5) * 10,
+  });
+};
+debugObject.maakCitroen = () => {
+  createLemon(1, {
+    x: (Math.random() - 0.5) * 10,
+    y: 10,
+    z: (Math.random() - 0.5) * 10,
+  });
+};
+gui.add(debugObject, "maakBowlingbal");
+gui.add(debugObject, "maakCitroen");
 /**
  * CSS2DRenderer
  */
@@ -30,21 +46,6 @@ labelRenderer.domElement.style.color = "white";
 labelRenderer.domElement.style.top = "0px";
 labelRenderer.domElement.style.pointerEvents = "none"; //Anders werken de OrbitControls niet
 document.body.appendChild(labelRenderer.domElement);
-
-// bowlingbal label
-const bowlingBallP = document.createElement("p");
-const bowlingBallDiv = document.createElement("div");
-bowlingBallDiv.appendChild(bowlingBallP);
-const bowlingBalLabel = new CSS2DObject(bowlingBallDiv);
-scene.add(bowlingBalLabel);
-bowlingBalLabel.position.set(0, 0, -2);
-//citroen label
-const lemonP = document.createElement("p");
-const lemonDiv = document.createElement("div");
-lemonDiv.appendChild(lemonP);
-const lemonLabel = new CSS2DObject(lemonDiv);
-scene.add(lemonLabel);
-lemonLabel.position.set(0, 0, -2);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -69,29 +70,6 @@ const groundMaterial = new THREE.MeshBasicMaterial({
 const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
 scene.add(groundMesh);
 
-//bowlingbal object
-const bowlingBallGeometry = new THREE.SphereGeometry(2);
-const bowlingBallMaterial = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
-  wireframe: true,
-});
-const bowlingballMesh = new THREE.Mesh(
-  bowlingBallGeometry,
-  bowlingBallMaterial
-);
-bowlingballMesh.add(bowlingBalLabel);
-scene.add(bowlingballMesh);
-
-//citroen object
-const lemonGeometry = new THREE.SphereGeometry(1);
-const lemonMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffff00,
-  wireframe: true,
-});
-const lemonMesh = new THREE.Mesh(lemonGeometry, lemonMaterial);
-lemonMesh.add(lemonLabel);
-scene.add(lemonMesh);
-
 //
 // Fysieke wereld
 //
@@ -107,9 +85,10 @@ const conretePlasticContactMaterial = new CANNON.ContactMaterial(
   plasticMaterial,
   {
     friction: 0.3,
-    restitution: 0.5,
+    restitution: 0.2,
   }
 );
+
 const conreteConcreteContactMaterial = new CANNON.ContactMaterial(
   concreteMaterial,
   concreteMaterial,
@@ -118,9 +97,13 @@ const conreteConcreteContactMaterial = new CANNON.ContactMaterial(
     restitution: 0.1,
   }
 );
-
 world.addContactMaterial(conretePlasticContactMaterial);
 world.addContactMaterial(conreteConcreteContactMaterial);
+
+conretePlasticContactMaterial.contactEquationStiffness = 1e8;
+conretePlasticContactMaterial.contactEquationRegularizationTime = 3;
+conreteConcreteContactMaterial.contactEquationStiffness = 1e8;
+conreteConcreteContactMaterial.contactEquationRegularizationTime = 3;
 
 // platform body
 const groundBody = new CANNON.Body({
@@ -132,64 +115,129 @@ const groundBody = new CANNON.Body({
 world.addBody(groundBody);
 groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 
-//bowlingbal body
-const bowlingBallBody = new CANNON.Body({
-  shape: new CANNON.Sphere(2),
-  mass: 7.26, //een standaard bowling bal weegt 7.26kg
-  position: new CANNON.Vec3(1, 20, 0),
-  material: concreteMaterial,
-});
-// FORCE
-bowlingBallBody.applyForce(
-  new CANNON.Vec3(0, 0, 0),
-  new CANNON.Vec3(0, 0, 0)
-);
-world.addBody(bowlingBallBody);
+// Utils
+let objectsToUpdate = [];
 
-// citroen body
-const lemonBody = new CANNON.Body({
-  shape: new CANNON.Sphere(1),
-  mass: 0.58, //een standaard citroen weegt 58gr
-  position: new CANNON.Vec3(0, 15, 0),
-  material: plasticMaterial,
+const bowlingBallGeometry = new THREE.SphereGeometry(1);
+const bowlingBallMaterial = new THREE.MeshBasicMaterial({
+  color: 0xff0000,
+  wireframe: true,
 });
-world.addBody(lemonBody);
+
+function createBowlingball(radius, position) {
+  // label
+  // bowlingbal label
+  const bowlingBallP = document.createElement("p");
+  const bowlingBallDiv = document.createElement("div");
+  bowlingBallDiv.appendChild(bowlingBallP);
+  const bowlingBalLabel = new CSS2DObject(bowlingBallDiv);
+  scene.add(bowlingBalLabel);
+  bowlingBalLabel.position.set(0, 0, -2);
+  // Three.js mesh
+  //bowlingbal object
+  const bowlingballMesh = new THREE.Mesh(
+    bowlingBallGeometry,
+    bowlingBallMaterial
+  );
+  bowlingballMesh.scale.set(radius, radius, radius);
+  bowlingballMesh.add(bowlingBalLabel);
+  bowlingballMesh.position.copy(position);
+  scene.add(bowlingballMesh);
+
+  // Cannon.js body
+  const bowlingBallBody = new CANNON.Body({
+    shape: new CANNON.Sphere(radius),
+    mass: 7.26, //een standaard bowlingbal weegt 7.26kg
+    position: new CANNON.Vec3(1, 20, 0),
+    material: concreteMaterial,
+  });
+
+  bowlingBallBody.position.copy(position);
+  world.addBody(bowlingBallBody);
+
+  //Opslaan in object voor later te animeren
+  objectsToUpdate.push({
+    mesh: bowlingballMesh,
+    body: bowlingBallBody,
+    text: bowlingBallP,
+  });
+}
+
+const lemonGeometry = new THREE.SphereGeometry(1);
+const lemonMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffff00,
+  wireframe: true,
+});
+
+function createLemon(radius, position) {
+  //citroen label
+  const lemonP = document.createElement("p");
+  const lemonDiv = document.createElement("div");
+  lemonDiv.appendChild(lemonP);
+  const lemonLabel = new CSS2DObject(lemonDiv);
+  scene.add(lemonLabel);
+  lemonLabel.position.set(0, 0, -2);
+
+  //citroen object
+  const lemonMesh = new THREE.Mesh(lemonGeometry, lemonMaterial);
+  lemonMesh.add(lemonLabel);
+  lemonMesh.scale.set(radius, radius, radius);
+  lemonMesh.position.copy(position);
+  scene.add(lemonMesh);
+
+  // citroen body
+  const lemonBody = new CANNON.Body({
+    shape: new CANNON.Sphere(1),
+    mass: 0.58, //een standaard citroen weegt 58gr
+    position: new CANNON.Vec3(0, 15, 0),
+    material: plasticMaterial,
+  });
+  lemonBody.position.copy(position);
+  world.addBody(lemonBody);
+
+  //Opslaan in object voor later te animeren
+  objectsToUpdate.push({
+    mesh: lemonMesh,
+    body: lemonBody,
+    text: lemonP,
+  });
+}
+
+createBowlingball(2, { x: 2, y: 200, z: 0 });
+createLemon(1, { x: 5, y: 200, z: 0 });
 
 const timeStep = 1 / 60;
 const clock = new THREE.Clock();
 let oldElapsedTime = 0;
-
 
 // Animate
 function animate() {
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - oldElapsedTime;
   oldElapsedTime = elapsedTime;
+
+  // Update physics world
   world.step(timeStep, deltaTime, 3);
+
+  for (const object of objectsToUpdate) {
+    //bowlingbal & citroen
+    object.mesh.position.copy(object.body.position);
+    object.mesh.quaternion.copy(object.body.quaternion);
+    object.text.textContent =
+      "val snelheid (m/s):" + Math.abs(object.body.velocity.y.toFixed(2));
+  }
 
   //platform
   groundMesh.position.copy(groundBody.position);
   groundMesh.quaternion.copy(groundBody.quaternion);
-  //bowling bal
-  bowlingballMesh.position.copy(bowlingBallBody.position);
-  bowlingballMesh.quaternion.copy(bowlingBallBody.quaternion);
-  //lemon
-  lemonMesh.position.copy(lemonBody.position);
-  lemonMesh.quaternion.copy(lemonBody.quaternion);
 
   // labelRenderer
   labelRenderer.render(scene, camera);
-  bowlingBallP.textContent =
-    "val snelheid (m/s):" + Math.abs(bowlingBallBody.velocity.y.toFixed(2));
-  lemonP.textContent =
-    "val snelheid (m/s):" + Math.abs(lemonBody.velocity.y.toFixed(2));
 
   renderer.render(scene, camera);
 }
 
 renderer.setAnimationLoop(animate);
-
-
 
 //Resizing
 window.addEventListener("resize", () => {
