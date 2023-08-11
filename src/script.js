@@ -6,6 +6,13 @@ import {
   CSS2DObject,
   CSS2DRenderer,
 } from "three/examples/jsm/renderers/CSS2DRenderer";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+
+/**
+ * Models
+ */
+
+const gltfLoader = new GLTFLoader();
 
 //Sizes
 const sizes = {
@@ -15,6 +22,24 @@ const sizes = {
 
 //Scene
 const scene = new THREE.Scene();
+
+/**
+ * Lights
+ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.set(1024, 1024);
+directionalLight.shadow.camera.far = 15;
+directionalLight.shadow.camera.left = -7;
+directionalLight.shadow.camera.top = 7;
+directionalLight.shadow.camera.right = 7;
+directionalLight.shadow.camera.bottom = -7;
+directionalLight.position.set(5, 5, 5);
+scene.add(directionalLight);
+
 /**
  * Debug
  */
@@ -62,12 +87,15 @@ orbit.update();
 //Objects
 // platform object
 const groundGeometry = new THREE.PlaneGeometry(30, 30);
-const groundMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffffff,
+const groundMaterial = new THREE.MeshStandardMaterial({
+  color: "#777777",
+  metalness: 0.3,
+  roughness: 0.4,
   side: THREE.DoubleSide,
-  wireframe: true,
+  // wireframe: true,
 });
 const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+groundMesh.receiveShadow = true;
 scene.add(groundMesh);
 
 //
@@ -118,12 +146,6 @@ groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 // Utils
 let objectsToUpdate = [];
 
-const bowlingBallGeometry = new THREE.SphereGeometry(1);
-const bowlingBallMaterial = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
-  wireframe: true,
-});
-
 function createBowlingball(radius, position) {
   // label
   // bowlingbal label
@@ -132,42 +154,34 @@ function createBowlingball(radius, position) {
   bowlingBallDiv.appendChild(bowlingBallP);
   const bowlingBalLabel = new CSS2DObject(bowlingBallDiv);
   scene.add(bowlingBalLabel);
-  bowlingBalLabel.position.set(0, 0, -2);
-  // Three.js mesh
-  //bowlingbal object
-  const bowlingballMesh = new THREE.Mesh(
-    bowlingBallGeometry,
-    bowlingBallMaterial
-  );
-  bowlingballMesh.scale.set(radius, radius, radius);
-  bowlingballMesh.add(bowlingBalLabel);
-  bowlingballMesh.position.copy(position);
-  scene.add(bowlingballMesh);
+  bowlingBalLabel.position.set(0, 0, 0);
 
-  // Cannon.js body
-  const bowlingBallBody = new CANNON.Body({
-    shape: new CANNON.Sphere(radius),
-    mass: 7.26, //een standaard bowlingbal weegt 7.26kg
-    position: new CANNON.Vec3(1, 20, 0),
-    material: concreteMaterial,
-  });
+  gltfLoader.load("/bowling_ball/scene.gltf", (gltf) => {
+    gltf.scene.scale.set(6 * radius, 6 * radius, 6 * radius);
+    gltf.scene.add(bowlingBalLabel);
+    gltf.scene.position.copy(position);
+    gltf.scene.castShadow = true;
+    scene.add(gltf.scene);
 
-  bowlingBallBody.position.copy(position);
-  world.addBody(bowlingBallBody);
+    // Cannon.js body
+    const bowlingBallBody = new CANNON.Body({
+      shape: new CANNON.Sphere(1.7),
+      mass: 7.26, //een standaard bowlingbal weegt 7.26kg
+      position: new CANNON.Vec3(1, 20, 0),
+      material: concreteMaterial,
+    });
 
-  //Opslaan in object voor later te animeren
-  objectsToUpdate.push({
-    mesh: bowlingballMesh,
-    body: bowlingBallBody,
-    text: bowlingBallP,
+    bowlingBallBody.position.copy(position);
+    world.addBody(bowlingBallBody);
+
+    //Opslaan in object voor later te animeren
+    objectsToUpdate.push({
+      mesh: gltf.scene,
+      body: bowlingBallBody,
+      text: bowlingBallP,
+    });
   });
 }
-
-const lemonGeometry = new THREE.SphereGeometry(1);
-const lemonMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffff00,
-  wireframe: true,
-});
 
 function createLemon(radius, position) {
   //citroen label
@@ -176,35 +190,36 @@ function createLemon(radius, position) {
   lemonDiv.appendChild(lemonP);
   const lemonLabel = new CSS2DObject(lemonDiv);
   scene.add(lemonLabel);
-  lemonLabel.position.set(0, 0, -2);
+  lemonLabel.position.set(0, 0, 0);
 
-  //citroen object
-  const lemonMesh = new THREE.Mesh(lemonGeometry, lemonMaterial);
-  lemonMesh.add(lemonLabel);
-  lemonMesh.scale.set(radius, radius, radius);
-  lemonMesh.position.copy(position);
-  scene.add(lemonMesh);
+  gltfLoader.load("/lemon/scene.gltf", (gltf) => {
+    gltf.scene.scale.set(10 * radius, 10 * radius, 10 * radius);
+    gltf.scene.add(lemonLabel);
+    gltf.scene.position.copy(position);
+    gltf.scene.castShadow = true;
+    scene.add(gltf.scene);
 
-  // citroen body
-  const lemonBody = new CANNON.Body({
-    shape: new CANNON.Sphere(1),
-    mass: 0.58, //een standaard citroen weegt 58gr
-    position: new CANNON.Vec3(0, 15, 0),
-    material: plasticMaterial,
-  });
-  lemonBody.position.copy(position);
-  world.addBody(lemonBody);
+    // citroen body
+    const lemonBody = new CANNON.Body({
+      shape: new CANNON.Sphere(0.3),
+      mass: 0.58, //een standaard citroen weegt 58gr
+      position: new CANNON.Vec3(0, 0, 0),
+      material: plasticMaterial,
+    });
+    lemonBody.position.copy(position);
+    world.addBody(lemonBody);
 
-  //Opslaan in object voor later te animeren
-  objectsToUpdate.push({
-    mesh: lemonMesh,
-    body: lemonBody,
-    text: lemonP,
+    //Opslaan in object voor later te animeren
+    objectsToUpdate.push({
+      mesh: gltf.scene,
+      body: lemonBody,
+      text: lemonP,
+    });
   });
 }
 
-createBowlingball(2, { x: 2, y: 200, z: 0 });
-createLemon(1, { x: 5, y: 200, z: 0 });
+createBowlingball(2, { x: 2, y: 20, z: 0 });
+createLemon(1, { x: 5, y: 20, z: 0 });
 
 const timeStep = 1 / 60;
 const clock = new THREE.Clock();
