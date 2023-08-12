@@ -1,0 +1,40 @@
+header, footer {
+  position: absolute;
+  width: 100%;
+  color: white;
+  text-align: center;
+  padding: 20px 0px;
+}
+
+h1 {
+  text-transform: capitalize;
+  font-size: 42px;
+  text-shadow: 2px 2px purple;
+}
+
+footer {
+  bottom: 0px;
+}
+
+div {
+  min-height: inherit;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+a {
+  color: white;
+  border: 2px solid white;
+  padding: 10px;
+  width: 200px;
+  text-decoration: none;
+  text-align: center;
+  text-transform: uppercase;
+  border-radius: 10px;
+  transition: all 500ms ease;
+}
+
+a:hover {
+  box-shadow: 10px -5px purple;
+}

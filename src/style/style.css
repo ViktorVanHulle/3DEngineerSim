@@ -8,6 +8,12 @@ body {
   overflow: hidden;
 }
 
+body {
+  background-color: darkblue;
+  width: 100%;
+  min-height: 100vh;
+}
+
 .webgl {
   position: fixed;
   top: 0;

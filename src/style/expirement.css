@@ -1,0 +1,15 @@
+#popup {
+  padding: 15px;
+  z-index: 50;
+  position: absolute;
+  width: 300px;
+  height: 80%;
+  background-color: white;
+  left: 0;
+  border: 10px solid white;
+  border-bottom-right-radius: 20px;
+}
+
+#popup h1{
+  margin: 10px 0;
+}

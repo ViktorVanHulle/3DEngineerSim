@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl - mirror</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link rel="stylesheet" href="../style/style.css" />
+    <link rel="stylesheet" href="../style/expirement.css" />
+  </head>
+  <body>
+    <div id="popup">
+      <h1>Expirement 3</h1>
+      <p>
+        Een spiegel is een voorwerp dat licht weerkaatst zonder verstrooiing.
+        Het oppervlak van de spiegel moet daarom dusdanig glad zijn dat de
+        weerkaatsing plaatsvindt volgens de wet "hoek van inval = hoek van
+        terugkaatsing".
+      </p>
+    </div>
+    <div id="container"></div>
+    <div id="info">
+      <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a>
+      - mirror
+    </div>
+
+    <!-- Import maps polyfill -->
+    <!-- Remove this when import maps will be widely supported -->
+    <script
+      async
+      src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
+    ></script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "../build/three.module.js",
+          "three/addons/": "./jsm/"
+        }
+      }
+    </script>
+    <script src="../scripts/thirdExpirement.js" type="module"></script>
+  </body>
+</html>
