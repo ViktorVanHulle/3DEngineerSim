@@ -7,6 +7,9 @@ import {
   CSS2DRenderer,
 } from "three/examples/jsm/renderers/CSS2DRenderer";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { ARButton } from "three/examples/jsm/webxr/ARButton";
+import { VRButton } from "three/examples/jsm/webxr/VRButton";
+import { XRButton } from "three/examples/jsm/webxr/XRButton";
 
 /**
  * Models
@@ -107,6 +110,7 @@ const world = new CANNON.World({
 // Materiaal
 const concreteMaterial = new CANNON.Material("concrete");
 const plasticMaterial = new CANNON.Material("plastic");
+const lightweightMaterial = new CANNON.Material("lightweight");
 
 const conretePlasticContactMaterial = new CANNON.ContactMaterial(
   concreteMaterial,
@@ -125,13 +129,24 @@ const conreteConcreteContactMaterial = new CANNON.ContactMaterial(
     restitution: 0.1,
   }
 );
+const conreteLightweightContactMaterial = new CANNON.ContactMaterial(
+  concreteMaterial,
+  lightweightMaterial,
+  {
+    friction: 0.5,
+    restitution: 0.0,
+  }
+);
 world.addContactMaterial(conretePlasticContactMaterial);
 world.addContactMaterial(conreteConcreteContactMaterial);
+world.addContactMaterial(conreteLightweightContactMaterial);
 
 conretePlasticContactMaterial.contactEquationStiffness = 1e8;
 conretePlasticContactMaterial.contactEquationRegularizationTime = 3;
 conreteConcreteContactMaterial.contactEquationStiffness = 1e8;
 conreteConcreteContactMaterial.contactEquationRegularizationTime = 3;
+conreteLightweightContactMaterial.contactEquationStiffness = 1e8;
+conreteLightweightContactMaterial.contactEquationRegularizationTime = 3;
 
 // platform body
 const groundBody = new CANNON.Body({
@@ -157,7 +172,8 @@ function createBowlingball(radius, position) {
   bowlingBalLabel.position.set(0, 0, 0);
 
   gltfLoader.load("/bowling_ball/scene.gltf", (gltf) => {
-    gltf.scene.scale.set(6 * radius, 6 * radius, 6 * radius);
+    gltf.scene.children[0].scale.multiplyScalar(5);
+    gltf.scene.scale.set(radius, radius, radius);
     gltf.scene.add(bowlingBalLabel);
     gltf.scene.position.copy(position);
     gltf.scene.castShadow = true;
@@ -165,7 +181,7 @@ function createBowlingball(radius, position) {
 
     // Cannon.js body
     const bowlingBallBody = new CANNON.Body({
-      shape: new CANNON.Sphere(1.7),
+      shape: new CANNON.Sphere(radius),
       mass: 7.26, //een standaard bowlingbal weegt 7.26kg
       position: new CANNON.Vec3(1, 20, 0),
       material: concreteMaterial,
@@ -193,7 +209,8 @@ function createLemon(radius, position) {
   lemonLabel.position.set(0, 0, 0);
 
   gltfLoader.load("/lemon/scene.gltf", (gltf) => {
-    gltf.scene.scale.set(10 * radius, 10 * radius, 10 * radius);
+    gltf.scene.children[0].scale.multiplyScalar(8);
+    gltf.scene.scale.set(radius, radius, radius);
     gltf.scene.add(lemonLabel);
     gltf.scene.position.copy(position);
     gltf.scene.castShadow = true;
@@ -201,7 +218,7 @@ function createLemon(radius, position) {
 
     // citroen body
     const lemonBody = new CANNON.Body({
-      shape: new CANNON.Sphere(0.3),
+      shape: new CANNON.Sphere(radius),
       mass: 0.58, //een standaard citroen weegt 58gr
       position: new CANNON.Vec3(0, 0, 0),
       material: plasticMaterial,
@@ -218,8 +235,65 @@ function createLemon(radius, position) {
   });
 }
 
+// function createFeather(radius, position) {
+//   //citroen label
+//   const featherP = document.createElement("p");
+//   const featherDiv = document.createElement("div");
+//   featherDiv.appendChild(featherP);
+//   const featherLabel = new CSS2DObject(featherDiv);
+//   scene.add(featherLabel);
+//   featherLabel.position.set(0, 0, 0);
+
+//   gltfLoader.load("/feather/scene.gltf", (gltf) => {
+//     gltf.scene.children[0].scale.multiplyScalar(0.1);
+//     gltf.scene.children[0].rotation.y = 20;
+//     gltf.scene.scale.set(radius, radius, radius);
+//     gltf.scene.add(featherLabel);
+//     gltf.scene.position.copy(position);
+//     gltf.scene.castShadow = true;
+//     scene.add(gltf.scene);
+
+//     // citroen body
+//     const featherBody = new CANNON.Body({
+//       shape: new CANNON.Sphere(radius),
+//       mass: 0.0082, //een standaard veer weegt 0.0082gr
+//       material: lightweightMaterial,
+//     });
+//     featherBody.position.copy(position);
+
+//     featherBody.applyForce(
+//       new CANNON.Vec3(0, 1.5, 0),
+//       new CANNON.Vec3(0, 0, 0)
+//     );
+
+//     world.addBody(featherBody);
+
+//     //Opslaan in object voor later te animeren
+//     objectsToUpdate.push({
+//       mesh: gltf.scene,
+//       body: featherBody,
+//       text: featherP,
+//     });
+//   });
+// }
+
 createBowlingball(2, { x: 2, y: 20, z: 0 });
 createLemon(1, { x: 5, y: 20, z: 0 });
+// createFeather(0.5, { x: -5, y: 20, z: 0 });
+
+/**
+ * VRT
+ */
+// AR
+renderer.xr.enabled = true;
+const ARbutton = ARButton.createButton(renderer);
+document.body.appendChild(ARbutton);
+// VR
+const VRbutton = VRButton.createButton(renderer);
+document.body.appendChild(VRbutton);
+// XR
+const XRbutton = XRButton.createButton(renderer);
+document.body.appendChild(XRbutton);
 
 const timeStep = 1 / 60;
 const clock = new THREE.Clock();

@@ -8,7 +8,8 @@
     "build": "vite build"
   },
   "devDependencies": {
-    "vite": "^4.3.9"
+    "vite": "^4.3.9",
+    "vite-plugin-mkcert": "^1.16.0"
   },
   "dependencies": {
     "cannon-es": "^0.20.0",

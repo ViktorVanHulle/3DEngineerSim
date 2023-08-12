@@ -15,6 +15,11 @@ body {
   outline: none;
 }
 
-p {
-  transform: translateX(-100px);
+#VRButton {
+  position: relative !important;
+  bottom: 0px !important;
+}
+#XRButton {
+  position: relative !important;
+  bottom: 0px !important;
 }
