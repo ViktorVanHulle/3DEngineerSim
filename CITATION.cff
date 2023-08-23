@@ -1,0 +1,37 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Educative Three.js 3D simulation webapp for simulating
+  physics for engineering studies.
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Viktor
+    family-names: Van Hulle
+    affiliation: HoGent
+identifiers:
+  - type: url
+    value: 'https://github.com/ViktorVanHulle/3DEngineerSim'
+repository-code: 'https://github.com/ViktorVanHulle/3DEngineerSim'
+abstract: >-
+  De auteur maakte dit prototype om fysische fenomenen,
+  gebaseerd op de inhoud van het boek 'Fysica in een
+  notendop', visueel te presenteren. Dit prototype is
+  gericht op ingenieursstudenten, maar het dient slechts als
+  een demonstratie van de capaciteiten van Three.js en
+  Cannon.js. Bovendien hebben we de uitdagingen van
+  Cannon.js in kaart gebracht voor het visualiseren van deze
+  simulatie.
+keywords:
+  - Three.js
+  - Cannon.js
+  - educative webapp
+  - prototype
+  - physics
+license: MIT
+commit: ab1052de4616785c95c5138c79a919de071914c4
+date-released: '2023-08-23'
