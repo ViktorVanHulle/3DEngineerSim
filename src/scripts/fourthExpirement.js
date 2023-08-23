@@ -1,5 +1,17 @@
 import * as THREE from "three";
+import * as dat from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+
+/**
+ * Debug
+ */
+const gui = new dat.GUI();
+const debugObject = {};
+debugObject.sunMass = 1989 * Math.pow(10, 30);
+debugObject.earthMass = 5.972 * Math.pow(10, 24);
+
+gui.add(debugObject, "sunMass").name("massa zon (kg)");
+gui.add(debugObject, "earthMass").name("massa aarde (kg)");
 
 import starsTexture from "/images/stars.jpg";
 import sunTexture from "/images/sun.jpg";

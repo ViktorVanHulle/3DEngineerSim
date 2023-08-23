@@ -48,22 +48,64 @@ scene.add(directionalLight);
  */
 const gui = new dat.GUI();
 const debugObject = {};
+debugObject.massaVanBalInKg = 10;
 debugObject.maakBowlingbal = () => {
   createBowlingball(2, {
     x: (Math.random() - 0.5) * 10,
-    y: 10,
+    y: 20,
     z: (Math.random() - 0.5) * 10,
   });
 };
 debugObject.maakCitroen = () => {
   createLemon(1, {
     x: (Math.random() - 0.5) * 10,
-    y: 10,
+    y: 20,
     z: (Math.random() - 0.5) * 10,
   });
 };
-gui.add(debugObject, "maakBowlingbal");
-gui.add(debugObject, "maakCitroen");
+debugObject.maakAllemaal = () => {
+  createLemon(1, {
+    x: (Math.random() - 0.5) * 10,
+    y: 20,
+    z: (Math.random() - 0.5) * 10,
+  });
+  createBowlingball(2, {
+    x: (Math.random() - 0.5) * 10,
+    y: 20,
+    z: (Math.random() - 0.5) * 10,
+  });
+  createFeather(0.5, {
+    x: (Math.random() - 0.5) * 10,
+    y: 20,
+    z: (Math.random() - 0.5) * 10,
+  });
+  createBall(2, {
+    x: (Math.random() - 0.5) * 10,
+    y: 20,
+    z: (Math.random() - 0.5) * 10,
+  });
+};
+debugObject.maakBal = () => {
+  createBall(2, {
+    x: (Math.random() - 0.5) * 10,
+    y: 20,
+    z: (Math.random() - 0.5) * 10,
+  });
+};
+debugObject.maakVeer = () => {
+  createFeather(0.5, {
+    x: (Math.random() - 0.5) * 10,
+    y: 20,
+    z: (Math.random() - 0.5) * 10,
+  });
+};
+
+gui.add(debugObject, "maakBowlingbal").name("maak bowlingbal");
+gui.add(debugObject, "maakCitroen").name("maak citroen");
+gui.add(debugObject, "maakVeer").name("maak veer");
+gui.add(debugObject, "massaVanBalInKg").name("massa bal (kg):");
+gui.add(debugObject, "maakBal").name("maak bal");
+gui.add(debugObject, "maakAllemaal").name("maak Allemaal");
 /**
  * CSS2DRenderer
  */
@@ -84,7 +126,7 @@ renderer.setSize(sizes.width, sizes.height);
 // Camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
 const orbit = new OrbitControls(camera, renderer.domElement);
-camera.position.set(0, 20, -30);
+camera.position.set(0, 10, -35);
 orbit.update();
 
 //Objects
@@ -120,7 +162,6 @@ const conretePlasticContactMaterial = new CANNON.ContactMaterial(
     restitution: 0.2,
   }
 );
-
 const conreteConcreteContactMaterial = new CANNON.ContactMaterial(
   concreteMaterial,
   concreteMaterial,
@@ -156,6 +197,7 @@ const groundBody = new CANNON.Body({
   material: concreteMaterial,
 });
 world.addBody(groundBody);
+groundBody.position.set(0, -10, 0);
 groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 
 // Utils
@@ -235,51 +277,91 @@ function createLemon(radius, position) {
   });
 }
 
-// function createFeather(radius, position) {
-//   //citroen label
-//   const featherP = document.createElement("p");
-//   const featherDiv = document.createElement("div");
-//   featherDiv.appendChild(featherP);
-//   const featherLabel = new CSS2DObject(featherDiv);
-//   scene.add(featherLabel);
-//   featherLabel.position.set(0, 0, 0);
+function createFeather(radius, position) {
+  //citroen label
+  const featherP = document.createElement("p");
+  const featherDiv = document.createElement("div");
+  featherDiv.appendChild(featherP);
+  const featherLabel = new CSS2DObject(featherDiv);
+  scene.add(featherLabel);
+  featherLabel.position.set(0, 0, 0);
 
-//   gltfLoader.load("/feather/scene.gltf", (gltf) => {
-//     gltf.scene.children[0].scale.multiplyScalar(0.1);
-//     gltf.scene.children[0].rotation.y = 20;
-//     gltf.scene.scale.set(radius, radius, radius);
-//     gltf.scene.add(featherLabel);
-//     gltf.scene.position.copy(position);
-//     gltf.scene.castShadow = true;
-//     scene.add(gltf.scene);
+  gltfLoader.load("/feather/scene.gltf", (gltf) => {
+    gltf.scene.children[0].scale.multiplyScalar(0.1);
+    gltf.scene.children[0].rotation.y = 20;
+    gltf.scene.scale.set(radius, radius, radius);
+    gltf.scene.add(featherLabel);
+    gltf.scene.position.copy(position);
+    gltf.scene.castShadow = true;
+    scene.add(gltf.scene);
 
-//     // citroen body
-//     const featherBody = new CANNON.Body({
-//       shape: new CANNON.Sphere(radius),
-//       mass: 0.0082, //een standaard veer weegt 0.0082gr
-//       material: lightweightMaterial,
-//     });
-//     featherBody.position.copy(position);
+    // citroen body
+    const featherBody = new CANNON.Body({
+      shape: new CANNON.Sphere(radius),
+      mass: 0.0082, //een standaard veer weegt 0.0082gr
+      material: lightweightMaterial,
+    });
+    featherBody.position.copy(position);
 
-//     featherBody.applyForce(
-//       new CANNON.Vec3(0, 1.5, 0),
-//       new CANNON.Vec3(0, 0, 0)
-//     );
+    featherBody.applyForce(
+      new CANNON.Vec3(0, 1.5, 0),
+      new CANNON.Vec3(0, 0, 0)
+    );
 
-//     world.addBody(featherBody);
+    world.addBody(featherBody);
 
-//     //Opslaan in object voor later te animeren
-//     objectsToUpdate.push({
-//       mesh: gltf.scene,
-//       body: featherBody,
-//       text: featherP,
-//     });
-//   });
-// }
+    //Opslaan in object voor later te animeren
+    objectsToUpdate.push({
+      mesh: gltf.scene,
+      body: featherBody,
+      text: featherP,
+    });
+  });
+}
 
+const geometry = new THREE.SphereGeometry();
+const material = new THREE.MeshNormalMaterial({
+  color: "red",
+});
+
+function createBall(radius, position) {
+  // label
+  const ballP = document.createElement("p");
+  const ballDiv = document.createElement("div");
+  ballDiv.appendChild(ballP);
+  const ballLabel = new CSS2DObject(ballDiv);
+  ballLabel.position.set(0, 0, 0);
+  scene.add(ballLabel);
+
+  // Mesh
+  const ballMesh = new THREE.Mesh(geometry, material);
+  ballMesh.scale.set(radius, radius, radius);
+  ballMesh.position.copy(position);
+  ballMesh.add(ballLabel);
+  scene.add(ballMesh);
+
+  // Cannon.js body
+  const ballBody = new CANNON.Body({
+    shape: new CANNON.Sphere(radius),
+    mass: debugObject.massaVanBalInKg,
+    material: concreteMaterial,
+  });
+  ballBody.position.copy(position);
+  world.addBody(ballBody);
+
+  //Opslaan in object voor later te animeren
+  objectsToUpdate.push({
+    mesh: ballMesh,
+    body: ballBody,
+    text: ballP,
+  });
+}
+
+// Spawn
 createBowlingball(2, { x: 2, y: 20, z: 0 });
 createLemon(1, { x: 5, y: 20, z: 0 });
-// createFeather(0.5, { x: -5, y: 20, z: 0 });
+createFeather(0.5, { x: -5, y: 20, z: 0 });
+createBall(1.5, { x: -7, y: 20, z: -2 });
 
 /**
  * VRT
